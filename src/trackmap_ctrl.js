@@ -215,9 +215,9 @@ export class TrackMapCtrl extends MetricsPanelCtrl {
             },
             options: [
                 {color: '#00eeff'}, {color: '#00ffcc'}, {color: '#00ffaa'},
-                {color: '#00ff66'}, {color: '#00ff00'}, {color: '#99ff00'}, //60
+                {color: '#00ff66'}, {color: '#00ff00'}, {color: '#99ff00'},
                 {color: '#bbff00'}, {color: '#eeff00'}, {color: '#ffee00'},
-                {color: '#ffbb00'}  {color: '#ff8800'}, {color: '#ff6600'},
+                {color: '#ffbb00'}, {color: '#ff8800'}, {color: '#ff6600'},
                 {color: '#ff2200'}, {color: '#ff1100'}, {color: '#ff0000'}
             ]
         },
