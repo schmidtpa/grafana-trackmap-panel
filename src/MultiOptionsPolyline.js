@@ -4,7 +4,7 @@
     } else if (typeof module === "object" && module.exports) {
         factory(require("leaflet"));
     } else {
-        factory(root.L);
+        factory(L);
     }
 } (this, function (L) {
     "use strict";
