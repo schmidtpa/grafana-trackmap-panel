@@ -204,7 +204,7 @@ export class TrackMapCtrl extends MetricsPanelCtrl {
         multiOptions: {
             optionIdxFn: function (latLng) {
                 var i, speed = latLng.alt,
-                    speedThresholds = [30, 50, 60, 70, 80, 90, 100, 120, 150];
+                    speedThresholds = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 150, 200];
 
                 for (i = 0; i < speedThresholds.length; ++i) {
                     if (speed <= speedThresholds[i]) {
@@ -214,13 +214,16 @@ export class TrackMapCtrl extends MetricsPanelCtrl {
                 return speedThresholds.length;
             },
             options: [
-                {color: '#0000FF'}, {color: '#0040FF'}, {color: '#0080FF'},
-                {color: '#00FFB0'}, {color: '#00E000'}, {color: '#80FF00'},
-                {color: '#FFFF00'}, {color: '#FFC000'}, {color: '#FF0000'}
+                {color: '#00eeff'}, {color: '#00ffcc'}, {color: '#00ffaa'},
+                {color: '#00ff66'}, {color: '#00ff00'}, {color: '#99ff00'}, //60
+                {color: '#bbff00'}, {color: '#eeff00'}, {color: '#ffee00'},
+                {color: '#ffbb00'}  {color: '#ff8800'}, {color: '#ff6600'},
+                {color: '#ff2200'}, {color: '#ff1100'}, {color: '#ff0000'}
             ]
         },
-        weight: 3,
-        lineCap: 'butt'
+        weight: 5,
+        lineCap: 'butt',
+        smoothFactor: 1
       }
     ).addTo(this.leafMap);
 
