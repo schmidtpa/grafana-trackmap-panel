@@ -199,10 +199,28 @@ export class TrackMapCtrl extends MetricsPanelCtrl {
 
   // Add the circles and polyline to the map
   addDataToMap() {
-    this.polyline = L.polyline(
+    this.polyline = L.multiOptionsPolyline(
       this.coords.map(x => x.position, this), {
-        color: this.panel.lineColor,
+        multiOptions: {
+            optionIdxFn: function (latLng) {
+                var i, speed = latLng.alt,
+                    speedThresholds = [30, 50, 60, 70, 80, 90, 100, 120, 150];
+
+                for (i = 0; i < speedThresholds.length; ++i) {
+                    if (speed <= speedThresholds[i]) {
+                        return i;
+                    }
+                }
+                return speedThresholds.length;
+            },
+            options: [
+                {color: '#0000FF'}, {color: '#0040FF'}, {color: '#0080FF'},
+                {color: '#00FFB0'}, {color: '#00E000'}, {color: '#80FF00'},
+                {color: '#FFFF00'}, {color: '#FFC000'}, {color: '#FF0000'}
+            ]
+        },
         weight: 3,
+        lineCap: 'butt'
       }
     ).addTo(this.leafMap);
 
@@ -226,7 +244,7 @@ export class TrackMapCtrl extends MetricsPanelCtrl {
   onDataReceived(data) {
     this.setupMap();
 
-    if (data.length === 0 || data.length !== 2) {
+    if (data.length === 0 || data.length !== 3) {
       // No data or incorrect data, show a world map and abort
       this.leafMap.setView([0, 0], 1);
       return;
@@ -237,6 +255,7 @@ export class TrackMapCtrl extends MetricsPanelCtrl {
     this.coords.length = 0;
     const lats = data[0].datapoints;
     const lons = data[1].datapoints;
+    const speeds = data[2].datapoints;
     for (let i = 0; i < lats.length; i++) {
       if (lats[i][0] == null || lons[i][0] == null ||
           lats[i][1] !== lats[i][1]) {
@@ -244,7 +263,7 @@ export class TrackMapCtrl extends MetricsPanelCtrl {
       }
 
       this.coords.push({
-        position: L.latLng(lats[i][0], lons[i][0]),
+        position: L.latLng(lats[i][0], lons[i][0], speeds[i][0]), //TODO: Do not use altitude for speed
         timestamp: lats[i][1]
       });
     }
