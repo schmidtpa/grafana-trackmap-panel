@@ -24,6 +24,7 @@ export class TrackMapCtrl extends MetricsPanelCtrl {
     this.coords = [];
     this.leafMap = null;
     this.polyline = null;
+    this.lastMarker = null;
     this.hoverMarker = null;
     this.hoverTarget = null;
 
@@ -112,6 +113,11 @@ export class TrackMapCtrl extends MetricsPanelCtrl {
       if (this.polyline) {
         this.polyline.removeFrom(this.leafMap);
       }
+      
+      if (this.lastMarker) {
+        this.lastMarker.removeFrom(this.leafMap);
+      }
+      
       this.onPanelClear();
       return;
     }
@@ -226,6 +232,14 @@ export class TrackMapCtrl extends MetricsPanelCtrl {
         smoothFactor: 1
       }
     ).addTo(this.leafMap);
+    
+    this.lastMarker = L.circleMarker(this.coords[this.coords.length - 1].position, {
+      color: '#ffffff',
+      fillColor: '#990000',
+      fillOpacity: 1,
+      weight: 2,
+      radius: 7
+    }).addTo(this.leafMap);
 
     this.zoomToFit();
   }
@@ -237,11 +251,6 @@ export class TrackMapCtrl extends MetricsPanelCtrl {
   }
 
   refreshColors() {
-    if (this.polyline) {
-      this.polyline.setStyle({
-        color: this.panel.lineColor
-      });
-    }
   }
 
   onDataReceived(data) {
