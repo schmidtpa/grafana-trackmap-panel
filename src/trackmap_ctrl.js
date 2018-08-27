@@ -11,7 +11,7 @@ import './MultiOptionsPolyline.js';
 const panelDefaults = {
   maxDataPoints: 500,
   autoZoom: true,
-  lineColor: 'red',
+  lastPointColor: 'darkred',
   pointColor: 'royalblue',
 }
 
@@ -235,7 +235,7 @@ export class TrackMapCtrl extends MetricsPanelCtrl {
     
     this.lastMarker = L.circleMarker(this.coords[this.coords.length - 1].position, {
       color: '#ffffff',
-      fillColor: '#990000',
+      fillColor: this.panel.lastPointColor,
       fillOpacity: 1,
       weight: 2,
       radius: 7
@@ -251,6 +251,12 @@ export class TrackMapCtrl extends MetricsPanelCtrl {
   }
 
   refreshColors() {
+      if (this.lastMarker) {
+        this.lastMarker.setStyle({
+            fillColor: this.panel.lastPointColor
+            
+        });
+      }
   }
 
   onDataReceived(data) {
