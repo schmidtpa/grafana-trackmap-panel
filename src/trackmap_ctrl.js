@@ -237,8 +237,8 @@ export class TrackMapCtrl extends MetricsPanelCtrl {
       color: '#ffffff',
       fillColor: '#990000',
       fillOpacity: 1,
-      weight: 2,
-      radius: 7
+      weight: 3,
+      radius: 5
     }).addTo(this.leafMap);
 
     this.zoomToFit();
