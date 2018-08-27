@@ -6,6 +6,7 @@ import {MetricsPanelCtrl} from 'app/plugins/sdk';
 
 import './leaflet/leaflet.css!';
 import './module.css!';
+import './leaflet.MultiOptionsPolyline.js';
 
 const panelDefaults = {
   maxDataPoints: 500,
