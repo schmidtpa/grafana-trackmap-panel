@@ -15,9 +15,17 @@ const panelDefaults = {
   pointColor: 'royalblue',
 }
 
+function log(msg) {
+  // uncomment for debugging
+  //console.log(msg);
+}
+
 export class TrackMapCtrl extends MetricsPanelCtrl {
   constructor($scope, $injector) {
     super($scope, $injector);
+
+    log("constructor");
+
     _.defaults(this.panel, panelDefaults);
 
     this.timeSrv = $injector.get('timeSrv');
@@ -27,26 +35,39 @@ export class TrackMapCtrl extends MetricsPanelCtrl {
     this.lastMarker = null;
     this.hoverMarker = null;
     this.hoverTarget = null;
+    this.setSizePromise = null;
 
     // Panel events
+    this.events.on('panel-initialized', this.onInitialized.bind(this));
+    this.events.on('view-mode-changed', this.onViewModeChanged.bind(this));
     this.events.on('init-edit-mode', this.onInitEditMode.bind(this));
     this.events.on('panel-teardown', this.onPanelTeardown.bind(this));
+    this.events.on('panel-size-changed', this.onPanelSizeChanged.bind(this));
     this.events.on('data-received', this.onDataReceived.bind(this));
+    this.events.on('data-snapshot-load', this.onDataSnapshotLoad.bind(this));
 
     // Global events
     appEvents.on('graph-hover', this.onPanelHover.bind(this));
     appEvents.on('graph-hover-clear', this.onPanelClear.bind(this));
   }
 
+  onInitialized(){
+    log("onInitialized");
+    this.render();
+  }
+
   onInitEditMode() {
-    this.addEditorTab('Options', 'public/plugins/grafana-trackmap-panel/editor.html', 2);
+    log("onInitEditMode");
+    this.addEditorTab('Options', 'public/plugins/pr0ps-trackmap-panel/partials/options.html', 2);
   }
 
   onPanelTeardown() {
-    this.$timeout.cancel(this.nextTickPromise);
+    log("onPanelTeardown");
+    this.$timeout.cancel(this.setSizePromise);
   }
 
   onPanelHover(evt) {
+    log("onPanelHover");
     if (this.coords.length === 0) {
       return;
     }
@@ -97,6 +118,7 @@ export class TrackMapCtrl extends MetricsPanelCtrl {
   }
 
   onPanelClear(evt) {
+    log("onPanelClear");
     // clear the highlighted circle
     this.hoverTarget = null;
     if (this.hoverMarker) {
@@ -107,7 +129,30 @@ export class TrackMapCtrl extends MetricsPanelCtrl {
     }
   }
 
+  onViewModeChanged(){
+    log("onViewModeChanged");
+    // KLUDGE: When the view mode is changed, panel resize events are not
+    //         emitted even if the panel was resized. Work around this by telling
+    //         the panel it's been resized whenever the view mode changes.
+    this.onPanelSizeChanged();
+  }
+
+  onPanelSizeChanged() {
+    log("onPanelSizeChanged");
+    // KLUDGE: This event is fired too soon - we need to delay doing the actual
+    //         size invalidation until after the panel has actually been resized.
+    this.$timeout.cancel(this.setSizePromise);
+    let map = this.leafMap;
+    this.setSizePromise = this.$timeout(function(){
+      if (map) {
+        log("Invalidating map size");
+        map.invalidateSize(true);
+      }}, 500
+    );
+  }
+
   setupMap() {
+    log("setupMap");
     // Create the map or get it back in a clean state if it already exists
     if (this.leafMap) {
       if (this.polyline) {
@@ -180,6 +225,7 @@ export class TrackMapCtrl extends MetricsPanelCtrl {
   }
 
   mapZoomToBox(e) {
+    log("mapZoomToBox");
     // Find time bounds of selected coordinates
     const bounds = this.coords.reduce(
       function(t, c) {
@@ -195,7 +241,7 @@ export class TrackMapCtrl extends MetricsPanelCtrl {
     // Set the global time range
     if (isFinite(bounds.from) && isFinite(bounds.to)) {
       // KLUDGE: Create moment objects here to avoid a TypeError that
-      // occurs when Grafana processes normal numbers
+      //         occurs when Grafana processes normal numbers
       this.timeSrv.setTime({
         from: moment.utc(bounds.from),
         to: moment.utc(bounds.to)
@@ -205,6 +251,7 @@ export class TrackMapCtrl extends MetricsPanelCtrl {
 
   // Add the circles and polyline to the map
   addDataToMap() {
+    log("addDataToMap");
     this.polyline = L.multiOptionsPolyline(
       this.coords.map(x => x.position, this), {
         multiOptions: {
@@ -245,21 +292,26 @@ export class TrackMapCtrl extends MetricsPanelCtrl {
   }
 
   zoomToFit(){
+    log("zoomToFit");
     if (this.panel.autoZoom){
       this.leafMap.fitBounds(this.polyline.getBounds());
     }
+    this.render();
   }
 
   refreshColors() {
-      if (this.lastMarker) {
+    log("refreshColors");
+    if (this.lastMarker) {
         this.lastMarker.setStyle({
             fillColor: this.panel.lastPointColor
             
         });
-      }
+    }
+    this.render();
   }
 
   onDataReceived(data) {
+    log("onDataReceived");
     this.setupMap();
 
     if (data.length === 0 || data.length !== 3) {
@@ -287,6 +339,11 @@ export class TrackMapCtrl extends MetricsPanelCtrl {
     }
     this.addDataToMap();
   }
+
+  onDataSnapshotLoad(snapshotData) {
+    log("onSnapshotLoad");
+    this.onDataReceived(snapshotData);
+  }
 }
 
-TrackMapCtrl.templateUrl = 'module.html';
+TrackMapCtrl.templateUrl = 'partials/module.html';

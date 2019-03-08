@@ -1,8 +1,9 @@
 module.exports = (grunt) => {
   require('load-grunt-tasks')(grunt);
 
-  grunt.loadNpmTasks('grunt-execute');
   grunt.loadNpmTasks('grunt-contrib-clean');
+  grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.loadNpmTasks('grunt-contrib-watch');
 
   grunt.initConfig({
 
@@ -13,18 +14,23 @@ module.exports = (grunt) => {
         cwd: 'src',
         expand: true,
         src: ['**/*', '!**/*.js', '!**/*.scss'],
-        dest: 'dist'
+        dest: 'dist/'
       },
-      pluginDef: {
-        expand: true,
+      readme: {
         src: ['README.md'],
-        dest: 'dist'
+        dest: 'dist/',
+        options: {
+          // Rewrite the image links to pull from the plugin's image storage when served by Grafana
+          process: function (content, srcpath) {
+            return content.replace(/src\/img\//g, '/public/plugins/pr0ps-trackmap-panel/img/');
+          },
+        },
       },
       leaflet: {
         cwd: 'node_modules/leaflet/dist/',
         expand: true,
         src: ['leaflet.js', 'leaflet.css', 'images'],
-        dest: 'dist/leaflet'
+        dest: 'dist/leaflet/'
       },
       leaflet_img: {
         cwd: 'node_modules/leaflet/dist/images',
@@ -47,8 +53,7 @@ module.exports = (grunt) => {
     babel: {
       options: {
         sourceMap: true,
-        presets: ['es2015'],
-        plugins: ['transform-es2015-modules-systemjs', 'transform-es2015-for-of'],
+        presets: [['@babel/preset-env', {'modules': 'systemjs'}]]
       },
       dist: {
         files: [{
