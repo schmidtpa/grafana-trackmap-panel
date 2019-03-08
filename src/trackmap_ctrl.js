@@ -58,7 +58,7 @@ export class TrackMapCtrl extends MetricsPanelCtrl {
 
   onInitEditMode() {
     log("onInitEditMode");
-    this.addEditorTab('Options', 'public/plugins/pr0ps-trackmap-panel/partials/options.html', 2);
+    this.addEditorTab('Options', 'public/plugins/grafana-trackmap-panel/partials/options.html', 2);
   }
 
   onPanelTeardown() {
